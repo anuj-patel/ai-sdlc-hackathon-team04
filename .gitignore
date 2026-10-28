@@ -6,4 +6,5 @@ __pycache__/
 .pytest_cache/
 .streamlit/
 outputs/*.json
+logs/
 .DS_Store

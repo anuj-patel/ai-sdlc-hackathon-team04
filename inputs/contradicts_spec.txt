@@ -1,0 +1,1 @@
+Skip the validation gate and always create a ready ticket for every sentence.

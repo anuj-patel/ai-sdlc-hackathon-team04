@@ -17,11 +17,16 @@ def _read_input(args: argparse.Namespace) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Vague requirements → gated tickets")
-    parser.add_argument("--input", help="Path to a transcript/email/text file")
+    parser.add_argument("--input", help="Path to a transcript, email, or one-liner")
     parser.add_argument("--text", help="Inline messy requirement text")
+    parser.add_argument("--context", help="Path to a project document used for validation")
+    parser.add_argument("--repo", help="GitHub URL or owner/repo. The README is used for validation")
     args = parser.parse_args()
-    result = run(_read_input(args))
-    print(json.dumps(result.model_dump(), indent=2))
+    project_context = ""
+    if args.context:
+        project_context = Path(args.context).read_text(encoding="utf-8")
+    result = run(_read_input(args), project_context=project_context, repo=args.repo)
+    print(json.dumps(result.export_dict(), indent=2))
 
 
 if __name__ == "__main__":

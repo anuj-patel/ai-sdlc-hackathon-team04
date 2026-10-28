@@ -1,0 +1,1 @@
+On the settings page, the signed-in user can switch the theme between light and dark. The choice persists after reload.

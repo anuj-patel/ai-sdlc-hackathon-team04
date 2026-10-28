@@ -8,5 +8,6 @@
     "min_rejected": 1,
     "min_clarify": 0
   },
+  "must_not_be_ready": ["improve the UX"],
   "notes": "CSV export of last 30 days with named columns is ready. 'improve the UX' must be rejected with that quote."
 }

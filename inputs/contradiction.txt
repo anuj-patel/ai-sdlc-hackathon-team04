@@ -1,0 +1,1 @@
+Transcript: Priya: Registration should auto-close when 32 players have joined. Omar: No auto-close — leave it open and just show a warning banner after 32. Priya: Fine, but we still need the count on the event card.

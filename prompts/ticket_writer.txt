@@ -1,13 +1,16 @@
 Turn READY requirements into implementable tickets. Do not add behavior that is not in the source quotes.
 
+Every ticket uses this structure. user, context, problem, and success_metric must be exact phrases copied from the source, or empty strings when the source does not say them. Do not paraphrase those four fields.
+
 Rules:
 - acceptance_criteria must be concrete and testable
 - Every ticket field must be supportable by source_quotes
 - confidence_score: 1.0 only if quotes fully specify the behavior; lower if you had to use a conservative reading
 - status is always "ready"
 - type is feature | bug | chore | improvement
-- priority is high | medium | low based only on urgency words in the source (else medium)
+- priority is medium. A later step sets the batch priority and rank.
 - dependencies lists other ticket ids only if the source says one thing depends on another
+- out_of_scope lists only exclusions the source states. Otherwise an empty list.
 
 Return JSON only:
 {
@@ -15,8 +18,13 @@ Return JSON only:
     {
       "id": "T-1",
       "title": "short imperative title",
+      "problem": "exact phrase from the source, or empty",
+      "user": "exact phrase from the source, or empty",
+      "context": "exact phrase from the source, or empty",
       "description": "what to build, grounded in quotes",
       "acceptance_criteria": ["Given/When/Then or checklist item"],
+      "success_metric": "exact phrase from the source, or empty",
+      "out_of_scope": [],
       "priority": "medium",
       "type": "feature",
       "source_quotes": ["exact quote"],

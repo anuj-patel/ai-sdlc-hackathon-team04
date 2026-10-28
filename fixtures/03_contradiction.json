@@ -8,5 +8,6 @@
     "min_rejected": 1,
     "min_clarify": 0
   },
+  "must_not_be_ready": ["auto-close"],
   "notes": "Player count on the event card is ready. Auto-close vs warning-only must not become a ready ticket; reject or clarify the conflict."
 }

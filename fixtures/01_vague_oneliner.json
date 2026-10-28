@@ -8,5 +8,6 @@
     "min_rejected": 1,
     "min_clarify": 0
   },
+  "must_not_be_ready": ["faster"],
   "notes": "Must not invent a performance budget or a theme toggle spec. Reject speed. Dark mode may reject or clarify, never become a ready ticket without more detail."
 }

@@ -1,0 +1,1 @@
+On the Streamlit page, show each rejected requirement with its exact source quote and the reason for rejection.
