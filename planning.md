@@ -121,3 +121,137 @@ The system **must** reject or flag:
 
 Once triggered, the entire pipeline runs **automatically**.
 
+---
+
+## Development Plan
+
+### Phase 0 – Foundation (First 2–3 hours)
+- [x] Project structure
+- [ ] Pydantic Ticket schema
+- [ ] Basic Extraction + Gate prompt
+- [ ] Minimal working CLI
+
+### Phase 1 – Core Pipeline
+- [ ] Robust Extraction Sub-Agent
+- [ ] Hard Validation Gates
+- [ ] Ticket Writer with acceptance criteria
+- [ ] Source quote traceability
+- [ ] Confidence scoring
+
+### Phase 2 – Quality & Evaluation
+- [ ] Handle official fixtures (planted defects)
+- [ ] Evaluation harness vs answer key
+- [ ] Edge case handling (empty, pure noise, contradictions)
+
+### Phase 3 – Bonus Features
+- [ ] Developer-Agent Check (simulate implementation)
+- [ ] Linear / GitHub Issues integration
+- [ ] Full agent trace visibility in UI
+
+### Phase 4 – Demo & Polish
+- [ ] Streamlit interface with step-by-step visibility
+- [ ] Clean README + demo script
+- [ ] Submission packaging
+
+---
+
+## Recommended Tech Stack
+
+| Layer              | Choice                          | Reason                              |
+|--------------------|---------------------------------|-------------------------------------|
+| Language           | Python 3.11+                    | Fast iteration                      |
+| LLM                | Claude 4 Sonnet / GPT-4o        | Strong structured output + refusal  |
+| Orchestration      | LangGraph                       | Clear state + gates                 |
+| Schema             | Pydantic + Instructor           | Guaranteed valid tickets            |
+| UI                 | Streamlit                       | Fastest professional demo           |
+| Tracker (bonus)    | Linear API or GitHub Issues     | Clean integration                   |
+
+**Lightweight alternative:** Sequential functions + strong prompts (no heavy framework) if time is very limited.
+
+---
+
+## Project Structure
+
+```
+vague-to-tickets/
+├── src/
+│   ├── schema.py              # Pydantic models
+│   ├── agents/
+│   │   ├── orchestrator.py
+│   │   ├── extraction.py
+│   │   ├── validation.py
+│   │   ├── ticket_writer.py
+│   │   └── developer_check.py
+│   ├── pipeline.py
+│   └── utils.py
+├── prompts/
+│   ├── extraction.txt
+│   ├── validation_gate.txt
+│   └── ticket_writer.txt
+├── inputs/                    # Sample messy texts
+├── fixtures/                  # Official test cases
+├── outputs/
+├── app.py                     # Streamlit UI
+├── main.py                    # CLI entrypoint
+├── evaluate.py                # Fixture runner
+├── .env
+└── README.md
+```
+
+---
+
+## Success Metrics (What Judges Care About)
+
+1. **No invention** — every requirement is traceable to source text
+2. **Rejection quality** — correctly catches vague / planted defects
+3. **Actionability** — tickets can be implemented without further questions
+4. **Structure** — clean, consistent ticket format
+5. **Bonus impact** — tracker integration or developer-agent verification
+
+---
+
+## Quick Start (Once Code is Ready)
+
+```bash
+# Setup
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Run CLI
+python main.py --text "Make the dashboard faster and add dark mode"
+
+# Run UI
+streamlit run app.py
+
+# Evaluate fixtures
+python evaluate.py --fixtures ./fixtures/
+```
+
+---
+
+## Timeline Suggestion (24–48h Hackathon)
+
+| Hours   | Focus                                      |
+|---------|--------------------------------------------|
+| 0–3     | Schema + first working Extraction+Gate     |
+| 3–8     | Validation gates + ticket generation       |
+| 8–14    | Full pipeline + sample testing             |
+| 14–18   | Fixtures + evaluation harness              |
+| 18–22   | Bonus feature + Streamlit UI               |
+| 22–24   | Demo polish + submission                   |
+
+---
+
+## Design Principles
+
+- **Gates over generation** — better to reject than to invent
+- **Traceability first** — every claim must quote the source
+- **Vertical slices** — each ticket should be independently implementable
+- **Visible reasoning** — show intermediate steps in the demo
+- **Automation** — human only intervenes when clarification is truly needed
+
+---
+
+**This is a Planning-stage AI-SDLC system.**  
+The quality of the tickets it produces directly determines how well downstream coding agents (or humans) can execute.

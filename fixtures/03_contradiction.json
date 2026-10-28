@@ -1,0 +1,12 @@
+{
+  "id": "03_contradiction",
+  "input": "Transcript: Priya: Registration should auto-close when 32 players have joined. Omar: No auto-close — leave it open and just show a warning banner after 32. Priya: Fine, but we still need the count on the event card.",
+  "planted_defects": ["contradiction auto-close vs warning only"],
+  "expected": {
+    "min_ready": 1,
+    "max_ready": 1,
+    "min_rejected": 1,
+    "min_clarify": 0
+  },
+  "notes": "Player count on the event card is ready. Auto-close vs warning-only must not become a ready ticket; reject or clarify the conflict."
+}

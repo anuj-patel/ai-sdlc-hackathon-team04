@@ -1,0 +1,12 @@
+{
+  "id": "01_vague_oneliner",
+  "input": "Make the dashboard faster and add dark mode",
+  "planted_defects": ["vague speed", "dark mode missing actor/context/success metric"],
+  "expected": {
+    "min_ready": 0,
+    "max_ready": 0,
+    "min_rejected": 1,
+    "min_clarify": 0
+  },
+  "notes": "Must not invent a performance budget or a theme toggle spec. Reject speed. Dark mode may reject or clarify, never become a ready ticket without more detail."
+}

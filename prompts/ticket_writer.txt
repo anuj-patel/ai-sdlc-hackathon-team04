@@ -1,0 +1,29 @@
+Turn READY requirements into implementable tickets. Do not add behavior that is not in the source quotes.
+
+Rules:
+- acceptance_criteria must be concrete and testable
+- Every ticket field must be supportable by source_quotes
+- confidence_score: 1.0 only if quotes fully specify the behavior; lower if you had to use a conservative reading
+- status is always "ready"
+- type is feature | bug | chore | improvement
+- priority is high | medium | low based only on urgency words in the source (else medium)
+- dependencies lists other ticket ids only if the source says one thing depends on another
+
+Return JSON only:
+{
+  "tickets": [
+    {
+      "id": "T-1",
+      "title": "short imperative title",
+      "description": "what to build, grounded in quotes",
+      "acceptance_criteria": ["Given/When/Then or checklist item"],
+      "priority": "medium",
+      "type": "feature",
+      "source_quotes": ["exact quote"],
+      "confidence_score": 0.8,
+      "status": "ready",
+      "clarification_questions": null,
+      "dependencies": []
+    }
+  ]
+}

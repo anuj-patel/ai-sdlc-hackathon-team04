@@ -1,0 +1,12 @@
+{
+  "id": "02_email_mixed",
+  "input": "Hey team — players keep asking for this. On the director event listing, add a CSV export of the last 30 days of events (event name, start date, status). Also please improve the UX while you are in there. Thanks, Davis",
+  "planted_defects": ["improve the UX is vague"],
+  "expected": {
+    "min_ready": 1,
+    "max_ready": 1,
+    "min_rejected": 1,
+    "min_clarify": 0
+  },
+  "notes": "CSV export of last 30 days with named columns is ready. 'improve the UX' must be rejected with that quote."
+}
