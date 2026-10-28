@@ -139,7 +139,18 @@ def _clear_ticket() -> Ticket:
 def _trace_is_a_file(result: PipelineResult) -> bool:
     exported = result.export_dict()
     log = ROOT / result.trace_log
-    return "agent_trace" not in exported and bool(result.prd) and log.is_file() and "orchestrator" in log.read_text()
+    text = log.read_text(encoding="utf-8")
+    body = [line for line in text.splitlines() if line and not line.startswith("step\t")]
+    return (
+        "agent_trace" not in exported
+        and bool(result.prd)
+        and log.is_file()
+        and len(body) >= 2
+        and body[0].startswith("01\t")
+        and "\torchestrator\t" in body[0]
+        and body[1].startswith("02\t")
+        and body[0] < body[1]
+    )
 
 
 def _sample(ticket_id: str, **updates: object) -> Ticket:

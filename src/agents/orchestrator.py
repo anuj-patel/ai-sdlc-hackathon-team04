@@ -12,7 +12,7 @@ from src.agents.validation import validate
 from src.github_context import clip_context, fetch_readme, parse_repo
 from src.prd import render_prd
 from src.schema import AgentStep, GateResult, PipelineResult, Ticket
-from src.trace_log import write_trace
+from src.trace_log import TraceLog
 from src.tracker import render_tracker_csv, render_tracker_markdown
 from src.utils import excerpt
 
@@ -32,13 +32,14 @@ def orchestrate(
     source = text or ""
     context = (project_context or "").strip()
     repo_value = (repo or "").strip()
-    trace: list[AgentStep] = [
+    log = TraceLog()
+    log.add(
         AgentStep(
             agent="orchestrator",
             summary="Routing extraction, traceability, validation, the developer check, and ordering.",
             count=6,
         )
-    ]
+    )
 
     report("orchestrator", "Choosing the order. This agent does not write tickets.")
     if repo_value:
@@ -46,7 +47,7 @@ def orchestrate(
         readme = fetch_readme(repo_value)
         block = f"GitHub README for {owner}/{name}\n\n{readme}"
         context = f"{context}\n\n{block}".strip() if context else block
-        trace.append(
+        log.add(
             AgentStep(
                 agent="orchestrator",
                 summary=f"Loaded the README from {owner}/{name} as the project document.",
@@ -57,9 +58,9 @@ def orchestrate(
     context_for_model = clip_context(context)
     if not source.strip():
         report("orchestrator", "Input is empty. Stopping before extraction.")
-        trace.append(AgentStep(agent="orchestrator", summary="Input is empty. Stopped before extraction.", count=0))
+        log.add(AgentStep(agent="orchestrator", summary="Input is empty. Stopped before extraction.", count=0))
         return _finish(
-            trace,
+            log,
             tickets=[],
             rejected=[],
             needs_clarification=[],
@@ -72,7 +73,7 @@ def orchestrate(
 
     report("extraction", "Reading the text and splitting it into separate asks, called candidates.")
     candidates = extract(source)
-    trace.append(
+    log.add(
         AgentStep(
             agent="extraction",
             summary=f"Extracted {len(candidates)} candidate requirement(s) with source quotes.",
@@ -82,7 +83,7 @@ def orchestrate(
 
     report("traceability", "Checking that every quote appears in the text you pasted.")
     kept, invented = split_candidates(source, candidates)
-    trace.append(
+    log.add(
         AgentStep(
             agent="traceability",
             summary=f"Rejected {len(invented)} candidate(s) whose quotes are not in the source.",
@@ -93,9 +94,23 @@ def orchestrate(
     report("validation", "Deciding ready, needs clarification, or rejected for each candidate.")
     validated = validate(source, kept, context_for_model) if kept else []
     validated = check_context_quotes(validated, context_for_model)
+    context_note = "against the project document" if context_for_model else "with no project document attached"
+    judged_ready = [gate for gate in validated if gate.decision == "ready"]
+    judged_clarify = [gate for gate in validated if gate.decision == "needs_clarification"]
+    judged_rejected = [gate for gate in validated if gate.decision == "rejected"]
+    log.add(
+        AgentStep(
+            agent="validation",
+            summary=(
+                f"Judged {len(validated)} candidate(s) {context_note}: "
+                f"{len(judged_ready)} ready, {len(judged_clarify)} need clarification, {len(judged_rejected)} rejected."
+            ),
+            count=len(validated),
+        )
+    )
     report("gatekeeper", "Blocking vague ready asks that have no measurable outcome.")
     validated, blocked = block_vague_ready(validated)
-    trace.append(
+    log.add(
         AgentStep(
             agent="gatekeeper",
             summary=f"Overturned {blocked} ready decision(s) that used vague language.",
@@ -105,32 +120,21 @@ def orchestrate(
     ready = [gate for gate in validated if gate.decision == "ready"]
     clarify = [gate for gate in validated if gate.decision == "needs_clarification"]
     rejected_by_gate = [gate for gate in validated if gate.decision == "rejected"]
-    context_note = "against the project document" if context_for_model else "with no project document attached"
-    trace.append(
-        AgentStep(
-            agent="validation",
-            summary=(
-                f"Judged {len(validated)} candidate(s) {context_note}: "
-                f"{len(ready)} ready, {len(clarify)} need clarification, {len(rejected_by_gate)} rejected."
-            ),
-            count=len(validated),
-        )
-    )
 
     report("ticket_writer", "Writing tickets only for candidates marked ready.")
     drafted = write_tickets(source, kept, ready)
-    report("traceability", "Checking the ticket quotes against the text again.")
-    tickets = filter_tickets(source, drafted)
-    tickets, vague_tickets = filter_vague_tickets(tickets)
-    dropped = len(drafted) - len(tickets)
-    trace.append(
+    log.add(
         AgentStep(
             agent="ticket_writer",
             summary=f"Drafted {len(drafted)} ticket(s) from ready requirements.",
             count=len(drafted),
         )
     )
-    trace.append(
+    report("traceability", "Checking the ticket quotes against the text again.")
+    tickets = filter_tickets(source, drafted)
+    tickets, vague_tickets = filter_vague_tickets(tickets)
+    dropped = len(drafted) - len(tickets)
+    log.add(
         AgentStep(
             agent="traceability",
             summary=(
@@ -143,7 +147,7 @@ def orchestrate(
 
     report("developer", "Checking whether a developer could build each ticket without guessing.")
     passed, held = apply_developer_check(tickets, source, kept)
-    trace.append(
+    log.add(
         AgentStep(
             agent="developer",
             summary=(
@@ -157,7 +161,7 @@ def orchestrate(
     report("ordering", "Ordering the ready tickets in this batch.")
     ranked, ordering_note = rank_tickets(passed, source)
     first = f" First is {ranked[0].id} ({ranked[0].priority})." if ranked else ""
-    trace.append(
+    log.add(
         AgentStep(
             agent="rice",
             summary=f"Ordered {len(ranked)} ticket(s).{first} {ordering_note}".strip(),
@@ -166,7 +170,7 @@ def orchestrate(
     )
 
     return _finish(
-        trace,
+        log,
         tickets=ranked,
         rejected=invented + rejected_by_gate,
         needs_clarification=clarify + held,
@@ -180,7 +184,7 @@ def orchestrate(
 
 
 def _finish(
-    trace: list[AgentStep],
+    log: TraceLog,
     *,
     tickets: list[Ticket],
     rejected: list[GateResult],
@@ -204,7 +208,7 @@ def _finish(
         needs_clarification=needs_clarification,
         gates=gates,
         candidates=candidates,
-        agent_trace=trace,
+        agent_trace=log.steps,
         input_excerpt=excerpt_text,
         project_context_excerpt=excerpt(context),
         repo=repo,
@@ -219,4 +223,4 @@ def _finish(
         tracker_markdown=render_tracker_markdown(tickets),
         tracker_csv=render_tracker_csv(tickets),
     )
-    return result.model_copy(update={"trace_log": write_trace(trace)})
+    return result.model_copy(update={"trace_log": log.relative})

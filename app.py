@@ -228,7 +228,7 @@ for step in parsed.agent_trace:
         unsafe_allow_html=True,
     )
 if parsed.trace_log:
-    st.caption(f"The agent log is saved in `{parsed.trace_log}`. It is not included in the JSON download.")
+    st.caption(f"The agent log is saved in `{parsed.trace_log}`. Steps are numbered in the order each agent finishes. The log is not included in the JSON download.")
 st.caption(
     "A candidate is one ask pulled from your text. It becomes a ticket only after validation, "
     "the vague-language gate, and the developer-agent check."
